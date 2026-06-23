@@ -134,7 +134,7 @@ export async function downloadReportPDF(
   doc.text("Costo por comprobante (USD)", margin, y);
   y += 4;
 
-  const chartH = Math.min(report.comparisons.length * 10 + 4, 70);
+  const chartH = report.comparisons.length * 9;
   const barMaxW = contentW * 0.55;
   const maxCost = Math.max(...report.comparisons.map((c) => c.costs.cost_per_receipt), 0.000001);
   const pdfBarColors: [number, number, number][] = [
