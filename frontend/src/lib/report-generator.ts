@@ -99,30 +99,32 @@ export async function downloadReportPDF(
   doc.text("Informe Comparativo de Costos", margin, 13);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
+  const shortFilename = report.receipt.filename.length > 35 ? report.receipt.filename.substring(0, 32) + "..." : report.receipt.filename;
   doc.text(`Generado: ${date}`, margin, 21);
-  doc.text(`Comprobante: ${report.receipt.filename}`, pageW / 2, 21);
+  doc.text(`Comprobante: ${shortFilename}`, pageW / 2, 21);
 
   let y = 36;
   doc.setTextColor(51, 51, 51);
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(margin, y, contentW, 18, 2, 2, "F");
+  doc.roundedRect(margin, y, contentW, 22, 2, 2, "F");
   doc.setFontSize(9);
-  const infoItems = [
-    `Imagen: ${report.receipt.width}×${report.receipt.height} (${report.receipt.format})`,
-    `Requiere mejora: ${report.receipt.quality_analysis.requires_enhancement ? "Sí" : "No"}`,
-    `Contraste: ${report.receipt.quality_analysis.contrast.toFixed(1)}`,
-    `Nitidez: ${report.receipt.quality_analysis.sharpness.toFixed(1)}`,
-    `Vol. diario: ${report.parameters.daily_volume}`,
-    `Vol. mensual: ${report.parameters.monthly_volume}`
-  ];
-  const colW = contentW / infoItems.length;
-  for (let i = 0; i < infoItems.length; i++) {
-    doc.text(infoItems[i], margin + 4 + i * colW, y + 7);
-  }
-  y += 8;
+  
+  const colW = contentW / 3;
+  
+  // Fila 1
+  doc.text(`Imagen: ${report.receipt.width}×${report.receipt.height} (${report.receipt.format})`, margin + 4, y + 6);
+  doc.text(`Contraste: ${report.receipt.quality_analysis.contrast.toFixed(1)}`, margin + 4 + colW, y + 6);
+  doc.text(`Vol. diario: ${report.parameters.daily_volume}`, margin + 4 + colW * 2, y + 6);
+  
+  // Fila 2
+  doc.text(`Requiere mejora: ${report.receipt.quality_analysis.requires_enhancement ? "Sí" : "No"}`, margin + 4, y + 13);
+  doc.text(`Nitidez: ${report.receipt.quality_analysis.sharpness.toFixed(1)}`, margin + 4 + colW, y + 13);
+  doc.text(`Vol. mensual: ${report.parameters.monthly_volume}`, margin + 4 + colW * 2, y + 13);
+
+  y += 14;
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Campos: ${report.parameters.fields.join(", ")}`, margin + 4, y + 7);
+  doc.text(`Campos: ${report.parameters.fields.join(", ")}`, margin + 4, y + 5);
 
   // ---- Bar chart ----
   y += 18;
@@ -200,8 +202,14 @@ export async function downloadReportPDF(
     doc.text("Resumen", margin + 4, summaryY + 6);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text(`Más económico: ${report.summary.cheapest} — $${report.summary.cheapest_cost.toFixed(8)}/comprobante`, margin + 4, summaryY + 12);
-    doc.text(`Más costoso: ${report.summary.most_expensive} — $${report.summary.most_expensive_cost.toFixed(8)}/comprobante`, pageW / 2, summaryY + 12);
+    
+    const cheapest = report.summary.cheapest ?? "—";
+    const mostExpensive = report.summary.most_expensive ?? "—";
+    const cheapestName = cheapest.length > 32 ? cheapest.substring(0, 29) + "..." : cheapest;
+    const mostExpensiveName = mostExpensive.length > 32 ? mostExpensive.substring(0, 29) + "..." : mostExpensive;
+    
+    doc.text(`Más económico: ${cheapestName} — $${report.summary.cheapest_cost.toFixed(8)}/comprobante`, margin + 4, summaryY + 12);
+    doc.text(`Más costoso: ${mostExpensiveName} — $${report.summary.most_expensive_cost.toFixed(8)}/comprobante`, pageW / 2, summaryY + 12);
   }
 
   const pageH = doc.internal.pageSize.getHeight();
@@ -320,7 +328,9 @@ export async function downloadHistoryPDF(receipts: ProcessedReceipt[], chat?: Ch
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text(`Generado: ${now}`, margin, 18);
-  doc.text(`Modelos: ${modelsUsed.join(", ")}`, pageW / 3, 18);
+  const modelsStr = modelsUsed.join(", ");
+  const shortModelsStr = modelsStr.length > 55 ? modelsStr.substring(0, 52) + "..." : modelsStr;
+  doc.text(`Modelos: ${shortModelsStr}`, pageW / 3, 18);
 
   // ---- Metric cards (2 rows x 4 cols) using autoTable ----
   let y = 30;

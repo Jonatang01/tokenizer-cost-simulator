@@ -135,6 +135,13 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+function generateUUID() {
+  if (typeof window !== "undefined" && typeof window.crypto !== "undefined" && typeof window.crypto.randomUUID === "function") {
+    return window.crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "rag">("dashboard");
   const [models, setModels] = useState<AiModel[]>([]);
@@ -600,7 +607,7 @@ export default function DashboardPage() {
         // Auto-save to history
         const selectedModel = models.find((m) => m.id === form.ocr_model_id);
         const entry: ProcessedReceipt = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           filename: file.name,
           processedAt: new Date().toISOString(),
           modelName: selectedModel?.display_name ?? analysisResult.model_name,
@@ -1576,13 +1583,13 @@ export default function DashboardPage() {
                 {/* Save to history button */}
                 {(receiptAnalysis || receiptExtraction) && receiptFile && (
                   <button
-                    className="focus-ring flex h-10 w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 px-4 text-sm font-semibold text-white shadow-sm transition-all hover:from-emerald-700 hover:to-teal-700"
+                    className="focus-ring flex h-10 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700"
                     type="button"
                     onClick={() => {
                       if (!receiptAnalysis) return;
                       const selectedModel = models.find((m) => m.id === form.ocr_model_id);
                       const entry: ProcessedReceipt = {
-                        id: crypto.randomUUID(),
+                        id: generateUUID(),
                         filename: receiptFile.name,
                         processedAt: new Date().toISOString(),
                         modelName: selectedModel?.display_name ?? receiptAnalysis.model_name,
