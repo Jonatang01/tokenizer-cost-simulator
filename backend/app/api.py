@@ -399,7 +399,9 @@ def get_api_keys():
 
 @router.post("/settings/keys", response_model=dict)
 def update_api_keys(keys: ApiKeysSchema):
-    env_path = "c:/Tokenizer/backend/.env"
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env_path = os.path.join(base_dir, ".env")
     updated = False
     
     def update_key(key_name: str, new_val: str | None, attr_name: str):
